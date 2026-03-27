@@ -325,6 +325,7 @@ class Node:
                     await player._dispatch_voice_update(player._voice_state)
 
                 if player.current:
+                    await player.set_volume(player.volume)
                     await player.play(track=player.current, start=min(player._last_position, player.current.length))
 
                     if player.is_paused:

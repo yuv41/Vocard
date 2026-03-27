@@ -73,9 +73,6 @@ async def connect_channel(ctx: Union[commands.Context, Interaction], channel: Vo
             channel, ctx, settings
         ))
 
-    if player.volume != 100:
-        await player.set_volume(player.volume)
-
     if ctx.bot.ipc.is_connected:
         await player.send_ws({"op": "createPlayer", "memberIds": [str(member.id) for member in channel.members]})
 
@@ -343,6 +340,7 @@ class Player(VoiceProtocol):
             "token": state['event']['token'],
             "endpoint": state['event']['endpoint'],
             "sessionId": state['sessionId'],
+            "channelId": str(self.channel.id),
         }
         
         await self.send(method=RequestMethod.PATCH, data={"voice": data})
@@ -541,6 +539,8 @@ class Player(VoiceProtocol):
 
         if self.channel:
             self._logger.debug(f"Player in {self.guild.name}({self.guild.id}) has been connected to {self.channel.name}({self.channel.id}).")
+        
+        await self.set_volume(self._volume)
             
     async def stop(self):
         """Stops the currently playing track."""
@@ -694,6 +694,8 @@ class Player(VoiceProtocol):
         """Sets the volume of the player as an integer. Lavalink accepts values from 0 to 500."""
         await self.send(method=RequestMethod.PATCH, data={"volume": volume})
         self._volume = volume
+        self.settings['volume'] = volume
+        await func.update_settings(self.guild.id, {"$set": {"volume": volume}})
 
         if self.is_ipc_connected:
             await self.send_ws({"op": "updateVolume", "volume": volume}, requester)
