@@ -184,8 +184,9 @@ class Settings(commands.Cog, name="settings"):
         player: voicelink.Player = ctx.guild.voice_client
         if player:
             await player.set_volume(value, ctx.author)
+        else:
+            await update_settings(ctx.guild.id, {"$set": {'volume': value}})
 
-        await update_settings(ctx.guild.id, {"$set": {'volume': value}})
         await send(ctx, 'setVolume', value)
 
     @settings.command(name="togglecontroller", aliases=get_aliases("togglecontroller"))

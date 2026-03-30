@@ -274,7 +274,6 @@ async def clearQueue(player: Player, member: Member, data: Dict) -> None:
 @require_permission(only_admin=True)
 async def updateVolume(player: Player, member: Member, data: Dict) -> None:
     volume = data.get("volume", 100)
-    await func.update_settings(player.guild.id, {"$set": {"volume": volume}})
     await player.set_volume(volume=volume, requester=member)
 
 async def updatePause(player: Player, member: Member, data: Dict) -> None:
